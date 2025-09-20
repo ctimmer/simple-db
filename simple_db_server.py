@@ -154,11 +154,21 @@ class SimpleDBServer :
         if not method_data ["allowed"] :
             self.rpc_error (RPC_METHOD_ERROR)        # method not allowed
             return
+        '''
+        # Old
         if "limit" in self.rpc_dict["params"] :
             if "limit_max" in method_data :
                 if self.rpc_dict["params"]["limit"] > method_data["limit_max"] :
                     ## adjust limit maximum
                     self.rpc_dict["params"]["limit"] = method_data["limit_max"]
+        '''
+        # New
+        if "limit_max" in method_data :
+            if "limit" in self.rpc_dict["params"] :
+                if self.rpc_dict["params"]["limit"] > method_data["limit_max"] :
+                    self.rpc_dict["params"]["limit"] = method_data["limit_max"]
+            else :
+                self.rpc_dict["params"]["limit"] = method_data["limit_max"]
         #print ("rpc: params", self.rpc_dict["params"])
         try :
             ## simple db function call
