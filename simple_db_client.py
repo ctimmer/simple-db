@@ -48,6 +48,15 @@ class SimpleDBClient :
             "row_data" : row_data
             }
         return self.send_rpc_request ("write_row", request_dict)
+    ## rewrites updated table row from update_data
+    def rewrite_row (self,table_name,key,update_data) :
+        #print ("w_r:", table_name,pk)
+        request_dict = {
+            "table_name" : table_name ,
+            "key" : key ,
+            "update_data" : update_data
+            }
+        return self.send_rpc_request ("rewrite_row", request_dict)
 
     ## read row from table/key, returns None if not found
     def read_row (self,table_name,key) :
@@ -168,11 +177,12 @@ def main () :
     #print (os.uname())
     my_db = SimpleDBClient ("127.0.0.1", 8080)
     #
-    '''
     my_db.write_row ("customer", "customer_number" ,  {"customer_number" : "000100" ,
                                                         "name":"Curt" ,
                                                         "dob":19560606 ,
                                                         "occupation":"retired"})
+    print ("rewrite:" ,
+        my_db.rewrite_row ("customer", "000100" , {"location" : "Alaska"}))
     my_db.write_row ("customer", "customer_number", {"customer_number" : "000500" ,
                                             "name":"Moe" ,
                                             "dob":19200101 ,
@@ -208,12 +218,10 @@ def main () :
                     0 ,
                     ["20250904141020","Warning", "Log warning"])
     #
-    '''
     print ("good read:", my_db.read_row ("customer", "000100")) # Good key
     print ("bad read:", my_db.read_row ("customer", "000199")) # bad key
     print ("all keys:", my_db.get_table_keys ("customer"))
     print ("rows:", my_db.get_table_rows ("customer", "000500", "990000"))
-    '''
     #
     my_db.get_table_items ("customer")
 
@@ -232,8 +240,8 @@ def main () :
         print ("row:", row)
         row = my_db.next_row ("log", row[0])
     #
-    '''
-    #my_db.commit ()
+    my_db.commit ()
+    my_db.dump_all ()
     my_db.close ()
 
 #----------------------------------------------------

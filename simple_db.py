@@ -200,7 +200,7 @@ class SimpleDB :
             items.append ([str (item[0].decode()), loads (item[1])])   # table row
             if len (items) >= limit :
                 break
-        print ("items:", items)
+        #print ("items:", items)
         return items
 
     ## dump_all
