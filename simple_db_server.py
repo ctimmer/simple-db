@@ -132,7 +132,7 @@ class SimpleDBServer :
         return self.rpc_reply
 
     def process_message (self, rpc_request) :
-        db_call = None
+        db_reply = None
         try :
             self.rpc_dict = json.loads (rpc_request)
         except :
@@ -154,15 +154,6 @@ class SimpleDBServer :
         if not method_data ["allowed"] :
             self.rpc_error (RPC_METHOD_ERROR)        # method not allowed
             return
-        '''
-        # Old
-        if "limit" in self.rpc_dict["params"] :
-            if "limit_max" in method_data :
-                if self.rpc_dict["params"]["limit"] > method_data["limit_max"] :
-                    ## adjust limit maximum
-                    self.rpc_dict["params"]["limit"] = method_data["limit_max"]
-        '''
-        # New
         if "limit_max" in method_data :
             if "limit" in self.rpc_dict["params"] :
                 if self.rpc_dict["params"]["limit"] > method_data["limit_max"] :
@@ -172,11 +163,11 @@ class SimpleDBServer :
         #print ("rpc: params", self.rpc_dict["params"])
         try :
             ## simple db function call
-            db_call = METHODS [self.rpc_dict["method"]]["method"] (**self.rpc_dict["params"])
+            db_reply = METHODS [self.rpc_dict["method"]]["method"] (**self.rpc_dict["params"])
         except Exception as e :
             self.rpc_error_message (RPC_DB_CALL_ERROR, str(e))
             return
-        self.rpc_reply ["result"] = db_call   # reply message
+        self.rpc_reply ["result"] = db_reply   # reply message
         
     def rpc_error_message (self, error_number, error_message) :
         message_save = RPC_ERRORS [error_number]
