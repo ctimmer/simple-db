@@ -1,8 +1,46 @@
 # simple-db - micropython relational DB using btree
 
+## Module Functions
+
+### Parameter Formats
+
+- table_name
+- pk
+- key, start_key, end_key
+- row_data
+- limit
+
+### Functions
+
+__init__ (db_file_path,key_separator,dump_separator,auto_commit)
+- db_file_path
+- key_separator
+- dump_separator
+- auto_commit
+
+__write_row__ (table_name,pk,row_data)
+
+__rewrite_row__ (table_name,key,update_data)
+
+__read_row__ (table_name,key)
+
+__next_row__ (table_name,key)
+
+__row_exists__ (table_name,key)
+
+__get_table_keys__ (table_name,start_key,end_key,limit)
+
+__get_table_rows__ (table_name,start_key,end_key,limit)
+
+__get_table_items__ (table_name,start_key,end_key,limit)
+
+__dump_all__ (file_path)
+
+__load__ (file_path)
+
 ## Internal Database Structure
 
-Micropython's btree database only stores a simple ID/Value pair. Refer ti the dump_all example below.
+Micropython's btree database only stores a simple ID/Value pair. Refer to the dump_all example below.
 
  To simulate a database table with a primary key(s) the btree ID is built from the table name concatenated with 1 or more keys in the row data. In the 1st line below the table name is "customer" and the primary key is "000100" (customer_number). A "~" separates the primary key from the row data.
 
@@ -18,7 +56,7 @@ my_db.write_row ("customer", # table_name
                     "dob":19560606 ,
                     "occupation":"retired"})
 my_db.rewrite_row ("customer", # table name
-                    "000100" , # pk
+                    "000100" , # key
                     {"location" : "Alaska"}) # row update
 ```
 The last line below was created with the following calls (json array):
