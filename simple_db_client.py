@@ -67,15 +67,21 @@ class SimpleDBClient :
         return self.send_rpc_request ("read_row", request_dict)
 
     ## read next table indexed row, or first row if key is not provided
+    def first_row (self,table_name,key = "") :
+        request_dict = {
+            "table_name" : table_name ,
+            "key" : key
+            }
+        reply = self.send_rpc_request ("first_row", request_dict)
+        return (reply)
+
+    ## read next table indexed row, or first row if key is not provided
     def next_row (self,table_name,key = "") :
         request_dict = {
             "table_name" : table_name ,
             "key" : key
             }
         reply = self.send_rpc_request ("next_row", request_dict)
-        #print ("next_row:", reply)
-        #reply = json.loads (reply)
-        #print ("next_row:", reply)
         return (reply)
 
     ## Return True if this key is in table_name

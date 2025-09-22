@@ -5,38 +5,86 @@
 ### Parameter Formats
 
 - table_name
-- pk
+  - Table containing the row data
+  - Name should not contain key_separator or dump_separator
+- pk primary key
+  - ID(s) in the row data used to build the primary key
+  - Must be correct type for the row data (dict or array)
+  - pk can be a scalar value (1 key) or an array (multiple keys)
+  - Key value should not contain key_separator or dump_separator
 - key, start_key, end_key
+  - key value(s) used to access row data
+  - start_key default is low value
+  - end_key default is high value
 - row_data
+  - row data associated with to primary key
+  - 2 possible formats
+    - dict containing ID/VAL pairs
+    - array containing only values
+  - Must include the primary key(s)
+- update_data
+  - Always a dictionary.
+  - Used ID/VAL to update specific columns in the row data
+  - Dictionary rows
+    - if the ID is missing from the row it will be created
+  - Array rows
+    - Only existing columns can be updated
+    - The row array cannot be extended with this function
 - limit
 
 ### Functions
 
-__init__ (db_file_path,key_separator,dump_separator,auto_commit)
-- db_file_path
-- key_separator
-- dump_separator
-- auto_commit
+__init (db_file_path, key_separator, dump_separator, auto_commit)__
+- db_file_path Required
+  - File name of the database
+  - If the file is missing it will be created
+- key_separator Default: "."
+  - Character used to separate the concatenated table name and key(s)
+- dump_separator Default: "~"
+  - Character used to separate the primary key from the row values
+- auto_commit Default: True
 
-__write_row__ (table_name,pk,row_data)
+__write_row (table_name, pk, row_data)__
+- Creates or overwrites the row for the specified table/key
 
-__rewrite_row__ (table_name,key,update_data)
+__rewrite_row (table_name, key, update_data)__
+- Updates only those table/key columns specified in update_data 
 
-__read_row__ (table_name,key)
+__read_row (table_name, key)__
+- Read a row for the specified table/key
+- None is returned if the key does not exist
 
-__next_row__ (table_name,key)
+__first_row (table_name, key)__
+- Returns first row with a pk >= key in table
 
-__row_exists__ (table_name,key)
+__next_row (table_name, key)__
+- Returns first row with a pk > key in table
 
-__get_table_keys__ (table_name,start_key,end_key,limit)
+__row_exists (table_name, key)__
+- Returns True if the key exists in table
 
-__get_table_rows__ (table_name,start_key,end_key,limit)
+__get_table_keys (table_name, start_key,  end_key, limit)__
+- Returns a list of keys in table from start_key up to end_key
 
-__get_table_items__ (table_name,start_key,end_key,limit)
+__get_table_rows (table_name, start_key,  end_key, limit)__
+- Returns a list of rows in table from start_key up to end_key
 
-__dump_all__ (file_path)
+__get_table_items (table_name, start_key, end_key, limit)__
+- Returns a list of key and rows in table from start_key up to end_key
 
-__load__ (file_path)
+__dump_all (file_path)__
+- Dumps the entire database to a file
+- Format: "primary key" + "~" + row_data
+- row_data will always be in json format
+
+__load (file_path)__
+- Loads database from file created by dump_all
+
+__commit ()__
+- Flushes updated cached buffers
+
+__close ()__
+- closes btree instance and database file
 
 ## Internal Database Structure
 

@@ -73,6 +73,10 @@ METHODS = {
         "allowed" : True ,
         "method" : None
         } ,
+    "first_row" : {
+        "allowed" : True ,
+        "method" : None
+        } ,
     "next_row" : {
         "allowed" : True ,
         "method" : None

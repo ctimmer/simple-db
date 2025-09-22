@@ -86,9 +86,10 @@ class SimpleDB :
     def build_key (self,table_name,key="") -> bytes :
         pk = [table_name]
         if isinstance (key, list) :
-            pk.extend (key)
+            for _, key_value in enumerate (key) :
+                pk.append (str (key_value))
         else :
-            pk.append (key)
+            pk.append (str (key))
         return bytes ((self.key_separator.join (pk)).encode ())
     ## rewrites table row from row_data
     def write_row (self,table_name,pk,row_data) :
@@ -132,6 +133,15 @@ class SimpleDB :
             return loads (self.db [self.build_key (table_name, key)])
         except Exception :
             return None
+
+    ## read first table indexed row, or first row if key is not provided
+    def first_row (self,table_name,key = "") :
+        row_ret = None             # Not found
+        start_key = self.build_key (table_name, key)
+        for db_key in self.db.keys (start_key, # None) :
+                                    self.build_key (table_name, self.key_high)) :
+            return loads (self.db [db_key])    # returns first key row
+        return row_ret
     ## read next table indexed row, or first row if key is not provided
     def next_row (self,table_name,key = "") :
         row_ret = None             # Not found
@@ -312,17 +322,17 @@ def main () :
     #
     my_db.get_table_items ("customer")
 
-    row = my_db.next_row ("customer")
+    row = my_db.first_row ("customer")
     while row is not None :
         print ("row:", row)
         row = my_db.next_row ("customer", row["customer_number"])
     #
-    row = my_db.next_row ("log")
+    row = my_db.first_row ("log")
     while row is not None :
         print ("row:", row)
         row = my_db.next_row ("log", row[0])
     #
-    row = my_db.next_row ("error_table")
+    row = my_db.first_row ("error_table")
     while row is not None :
         print ("row:", row)
         row = my_db.next_row ("log", row[0])
