@@ -1,5 +1,18 @@
 # simple-db - micropython relational DB using btree
 
+## Table of Contents
+
+- __[Overview](#overview)__
+- __[Module Functions](#module-functions)__
+  - [Parameter Formates](#parameter-formats)
+  - [Functions](#functions)
+- __[Client Server Implementation](#client-server-implementation)__
+- __[Internal Database Structure](#internal-database-structure)__
+  - [Other Storage Considerations](#other-storage-considerations)
+- __[Files](#files)__
+
+## Overview
+
 ## Module Functions
 
 ### Parameter Formats
@@ -31,6 +44,7 @@
     - Only existing columns can be updated
     - The row array cannot be extended with this function
 - limit
+  - Sets the maximum number of returned values for those functions that return lists
 
 ### Functions
 
@@ -86,6 +100,8 @@ __commit ()__
 __close ()__
 - closes btree instance and database file
 
+## Client Server Implementation
+
 ## Internal Database Structure
 
 Micropython's btree database only stores a simple ID/Value pair. Refer to the dump_all example below.
@@ -117,7 +133,7 @@ my_db.write_row ("log", # table name
                 "Log warning"])
 ```
 
-__dump_all example:__
+### dump_all example:
 
 ```
 
@@ -132,18 +148,27 @@ log.20250903122010~["20250903122010", "Error", "Log error"]
 log.20250904141020~["20250904141020", "Warning", "Log warning"]
 ```
 
+### Other Storage Considerations
 
+#### msgpack
+
+msgpack is another way to serialize python dictionaries and arrays. It is more compact and faster than json. The simple_db module can be configured to use msgpack by setting USE_JSON to False. The source can be found [here](https://github.com/peterhinch/micropython-msgpack).
+
+- Notes
+  - msgpack can serialize python entities that are not compatible with json. This would only be a problem if you planned to use the dump_all and load functions (not tested).
 
 ## Files
 
 - simple_db.py
   - Provides a relational type database interface using btree
+- simple_db_tester.py
+  - Not implemented yet but I plan to move the main function code from the modules to this application.
 - simple_db_client.py
   - simple_db interface to a remote server.
   - Function call are the same as simple_db.py
   - Tested with simple_db_microdot.py server.
 - simple_db_server.py
-  - Accepts json RPC requests database requests and returns the results.
+  - Accepts json RPC database requests and returns the results.
   - This module does not handle any communications.
   - Imports btree.
 - simple_db_microdot.py

@@ -231,7 +231,7 @@ def main () :
     #
     my_db.get_table_items ("customer")
 
-    row = my_db.next_row ("customer")
+    row = my_db.first_row ("customer")
     while row is not None :
         print ("row:", row)
         row = my_db.next_row ("customer", row["customer_number"])
