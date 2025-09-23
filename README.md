@@ -9,6 +9,8 @@
 - __[Client Server Implementation](#client-server-implementation)__
 - __[Internal Database Structure](#internal-database-structure)__
   - [Other Storage Considerations](#other-storage-considerations)
+    - [msgpack](#msgpack)
+    - [btrees DB](#btrees-db)
 - __[Files](#files)__
 
 ## Overview
@@ -137,8 +139,8 @@ my_db.write_row ("log", # table name
 
 ### dump_all example:
 
+__Format:__ \<table_name\>.\<primary key(s)\>~\<row data\>
 ```
-
 customer.000100~{"dob": 19560606, "customer_number": "000100", "name": "Curt", "occupation": "retired", "location": "Alaska"}
 customer.000500~{"dob": 19200101, "customer_number": "000500", "name": "Moe", "occupation": "Three stooges"}
 customer.001000~{"dob": 19250303, "customer_number": "001000", "name": "Curly", "occupation": "Three stooges"}

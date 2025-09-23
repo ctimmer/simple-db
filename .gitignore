@@ -1,8 +1,9 @@
 # Byte-compiled / optimized / DLL files
+
 # my ignores
 *.swp
 db_dump.txt
-test.db
+*test.db*
 btrees/
 
 __pycache__/

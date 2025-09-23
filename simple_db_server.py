@@ -26,7 +26,11 @@
 
 import json
 
-from simple_db import SimpleDB, simpledb_available
+# Run the following with micropython
+#from simple_db import SimpleDB, simpledb_available
+
+# Run the following with python
+from simple_db_btrees import SimpleDB, simpledb_available
 
 '''
 From json-rpc documentation
@@ -117,7 +121,7 @@ METHODS = {
         
 class SimpleDBServer :
     def __init__ (self ,
-                    db_file_name = "test.db") :
+                    db_file_name = "server_test.db") :
         ## Set up database methods
         self.db = SimpleDB (db_file_name)
         for _, (method_id, method_data) in enumerate (METHODS.items ()) :
