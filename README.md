@@ -13,6 +13,8 @@
 
 ## Overview
 
+Basic relational type database interface.
+
 ## Module Functions
 
 ### Parameter Formats
@@ -157,10 +159,24 @@ msgpack is another way to serialize python dictionaries and arrays. It is more c
 - Notes
   - msgpack can serialize python entities that are not compatible with json. This would only be a problem if you planned to use the dump_all and load functions (not tested).
 
+#### btrees DB
+
+simple_db_btrees.py is a direct replacement for simple_db.py. It uses btrees database, a much more robust DB system.
+
+- Notes
+  - This module will NOT run under Micropython. It can only be used with a remote server. See simple_db_microdot.py.
+  - Requires in a virtual environment
+    - pip install BTrees
+    - pip install ZODB
+  - msgpack (optional) requires in the same virtual environment
+    - pip install u-msgpack-python
+
 ## Files
 
 - simple_db.py
   - Provides a relational type database interface using btree
+- simple_db_btrees.py
+  - Experimental, used btrees database but is functionally equivalent to simple_db.py
 - simple_db_tester.py
   - Not implemented yet but I plan to move the main function code from the modules to this application.
 - simple_db_client.py

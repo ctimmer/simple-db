@@ -1,4 +1,10 @@
 # Byte-compiled / optimized / DLL files
+# my ignores
+*.swp
+db_dump.txt
+test.db
+btrees/
+
 __pycache__/
 *.py[codz]
 *$py.class
