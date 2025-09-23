@@ -69,7 +69,7 @@ class SimpleDB :
             print ("support module(s) missing")
             #raise ???
             return
-        self.db_file = None
+        self.db_file_path = db_file_path
         print (db_file_path)
         try:
             self.db_file = open(db_file_path, "r+b")
@@ -214,8 +214,11 @@ class SimpleDB :
         return items
 
     ## dump_all
-    def dump_all (self, file_path = "db_dump.txt") :
-        with open (file_path, "w") as dump_file :
+    def dump_all (self, file_path = None) :
+        file_name = file_path
+        if file_name is None :
+            file_name = self.db_file_path + ".dump.txt"
+        with open (file_name, "w") as dump_file :
             for key in self.db :
                 row = self.db[key]
                 key = str (key.decode ())
@@ -230,9 +233,12 @@ class SimpleDB :
                 dump_file.write (key + self.dump_separator + row + "\n")
 
     ## load - Load DB from dump_all file format
-    def load (self, file_path = "db_dump.txt") :
-        print ("Loading:", file_path)
-        with open (file_path, "r") as load_file :
+    def load (self, file_path = None) :
+        file_name = file_path
+        if file_name is None :
+            file_name = self.db_file_path + ".dump.txt"
+        print ("Loading:", file_name)
+        with open (file_name, "r") as load_file :
             for line in load_file:
                 key_row = (line.strip()).split (self.dump_separator)
                 #print ("key_row:",key_row)
@@ -260,7 +266,7 @@ class SimpleDB :
 def main () :
     import os
     #print (os.uname())
-    db_file_name = "test.db"
+    db_file_name = "btree_test.db"
     try :
         os.remove (db_file_name)
         print ("Removed:", db_file_name)
