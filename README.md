@@ -156,14 +156,18 @@ log.20250904141020~["20250904141020", "Warning", "Log warning"]
 
 #### msgpack
 
-msgpack is another way to serialize python dictionaries and arrays. It is more compact and faster than json. The simple_db module can be configured to use msgpack by setting USE_JSON to False. The source can be found [here](https://github.com/peterhinch/micropython-msgpack).
+msgpack is another way to serialize python dictionaries and arrays.
+It is more compact and faster than json.
+The simple_db module can be configured to use msgpack by setting USE_JSON to False.
+The source can be found [here](https://github.com/peterhinch/micropython-msgpack).
 
 - Notes
   - msgpack can serialize python entities that are not compatible with json. This would only be a problem if you planned to use the dump_all and load functions (not tested).
 
 #### btrees DB
 
-simple_db_btrees.py is a direct replacement for simple_db.py. It uses btrees database, a much more robust DB system.
+simple_db_btrees.py is a direct replacement for simple_db.py.
+It uses btrees database, a much more robust DB system.
 
 - Notes
   - This module will NOT run under Micropython. It can only be used with a remote server. See simple_db_microdot.py.
@@ -172,6 +176,11 @@ simple_db_btrees.py is a direct replacement for simple_db.py. It uses btrees dat
     - pip install ZODB
   - msgpack (optional) requires in the same virtual environment
     - pip install u-msgpack-python
+
+#### Decimal Numbers
+
+Decimal numbers (e.g. currency) should be stored as strings.
+The client application can then use [mpy_decimal](https://github.com/mpy-dev/micropython-decimal-number) to manipulate without floating point errors.
 
 ## Files
 
