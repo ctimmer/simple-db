@@ -193,23 +193,6 @@ class SimpleDBClient :
                 pass   # Do something here?
         return None
 
-        response = None
-        try :
-            response = requests.post (self.url,
-                                        json = rpc_dict,
-                                        headers = self.post_headers)
-            #print ("send_rpc: reply:",response.json())
-            reply = response.json ()
-            if "result" in reply :
-                return reply ["result"]
-        except Exception as e :
-            print ("req.post:", e)
-        finally :
-            if response is not None :
-                response.close ()
-        ## report error here
-        return None
-
     def close (self) :
         pass
 
