@@ -29,6 +29,11 @@ Basic relational type database interface.
   - Must be correct type for the row data (dict or array)
   - pk can be a scalar value (1 key) or an array (multiple keys)
   - Key value should not contain key_separator or dump_separator
+- column_list
+  - ID(s) in the row data used to return column values
+  - Must be correct type for the row data (dict or array)
+  - Invalid IDs will be returned with a None value
+  - A dictionary is returned by this function
 - key, start_key, end_key
   - key value(s) used to access row data
   - start_key default is low value
@@ -71,6 +76,11 @@ __rewrite_row (table_name, key, update_data)__
 __read_row (table_name, key)__
 - Read a row for the specified table/key
 - None is returned if the key does not exist
+
+__read_columns (table_name, key, column_list)__
+- Read a row for the specified table/key
+- None is returned if the key does not exist
+- Returns only those column values from column list
 
 __first_row (table_name, key)__
 - Returns first row with a pk >= key in table
@@ -187,7 +197,7 @@ The client application can then use [mpy_decimal](https://github.com/mpy-dev/mic
 - simple_db.py
   - Provides a relational type database interface using btree
 - simple_db_btrees.py
-  - Experimental, used btrees database but is functionally equivalent to simple_db.py
+  - Experimental, uses btrees database but is functionally equivalent to simple_db.py
 - simple_db_tester.py
   - Not implemented yet but I plan to move the main function code from the modules to this application.
 - simple_db_client.py

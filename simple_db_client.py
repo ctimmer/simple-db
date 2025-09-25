@@ -33,10 +33,31 @@
 import requests
 import json
 
+## This function determines how the json RPC request is sent
+# The RPC reply is returned as a dict or None on error
+REQUEST_URL = None
+def send_request (rpc_dict) :
+    response = None
+    try :
+        response = requests.post (REQUEST_URL ,
+                                    json = rpc_dict ,
+                                    headers = {'Content-Type': 'application/json'})
+        #print ("send_rpc: reply:",response.json())
+        return response.json ()
+    except Exception as e :
+        print ("requests.post:", e)
+    finally :
+        if response is not None :
+            response.close ()
+    ## report error here
+    return None
+
 class SimpleDBClient :
     def __init__ (self, hostname = "localhost", port = 8080) :
+        global REQUEST_URL
         self.id = 0
         self.url = "http://" + hostname + ":" + str (port)
+        REQUEST_URL = self.url
         self.post_headers = {'Content-Type': 'application/json'}
 
     ## writes/rewrites table row from row_data
@@ -65,6 +86,14 @@ class SimpleDBClient :
             "key" : key
             }
         return self.send_rpc_request ("read_row", request_dict)
+    ## read row column from table/key, returns None if not found
+    def read_columns (self,table_name,key,column_list) :
+        request_dict = {
+            "table_name" : table_name ,
+            "key" : key ,
+            "column_list" : column_list
+            }
+        return self.send_rpc_request ("read_columns", request_dict)
 
     ## read next table indexed row, or first row if key is not provided
     def first_row (self,table_name,key = "") :
@@ -99,6 +128,7 @@ class SimpleDBClient :
             }
         return self.send_rpc_request ("delete_row", request_dict)
     ## Returns list of keys in table
+    # Not too useful except for testing
     def get_table_keys (self,table_name,start_key=None,end_key=None,limit=999999) :
         request_dict = {
             "table_name" : table_name ,
@@ -118,7 +148,7 @@ class SimpleDBClient :
             }
         return self.send_rpc_request ("get_table_rows", request_dict)
 
-    ## Returns list of rows in a table
+    ## Returns list of keys/rows from a table
     def get_table_items (self,table_name,start_key=None,end_key=None,limit=999999) :
         request_dict = {
             "table_name" : table_name ,
@@ -155,6 +185,14 @@ class SimpleDBClient :
             "id" : str (self.id)
             }
         #print ("send_rpc: request:", self.url, rpc_dict)
+        reply = send_request (rpc_dict)
+        if reply is not None :
+            if "result" in reply :
+                return reply ["result"]
+            elif "error" in reply :
+                pass   # Do something here?
+        return None
+
         response = None
         try :
             response = requests.post (self.url,
@@ -189,6 +227,8 @@ def main () :
                                                         "occupation":"retired"})
     print ("rewrite:" ,
         my_db.rewrite_row ("customer", "000100" , {"location" : "Alaska"}))
+    print ("read_columns:" ,
+        my_db.read_columns ("customer", "000100" , ["name","location","bad_id"]))
     my_db.write_row ("customer", "customer_number", {"customer_number" : "000500" ,
                                             "name":"Moe" ,
                                             "dob":19200101 ,

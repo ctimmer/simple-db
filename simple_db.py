@@ -133,6 +133,27 @@ class SimpleDB :
             return loads (self.db [self.build_key (table_name, key)])
         except Exception :
             return None
+    ## read row columns from table/key, returns None if not found
+    def read_columns (self,table_name,key,column_list) :
+        #print ("read_columns:", self.build_key (table_name, key), column_list)
+        try :
+            row = loads (self.db [self.build_key (table_name, key)])
+            columns = {}
+            # set valid valid column id test
+            id_exists = None
+            if isinstance (row, list) :
+                id_exists = lambda col_id : col_id >= 0 and col_id < len (row)
+            else :
+                id_exists = lambda col_id : col_id in row
+            for _, col_id in enumerate (column_list) :
+                if id_exists (col_id) :
+                    columns [col_id] = row [col_id]   # Valid column id
+                else :
+                    columns [col_id] = None           # Bad column id
+            return columns
+        except Exception as e :
+            print (e)
+            return None
 
     ## read first table indexed row, or first row if key is not provided
     def first_row (self,table_name,key = "") :
@@ -284,8 +305,10 @@ def main () :
                                                         "name":"Curt" ,
                                                         "dob":19560606 ,
                                                         "occupation":"retired"})
-    print ("rewrite:" ,
+    print ("rewrite_row:" ,
         my_db.rewrite_row ("customer", "000100" , {"location" : "Alaska"}))
+    print ("read_columns:" ,
+        my_db.read_columns ("customer", "000100" , ["name","location","bad_id"]))
     my_db.write_row ("customer", "customer_number", {"customer_number" : "000500" ,
                                             "name":"Moe" ,
                                             "dob":19200101 ,
@@ -320,6 +343,8 @@ def main () :
     my_db.write_row ("log",
                     0 ,
                     ["20250904141020","Warning", "Log warning"])
+    print ("read_columns:" ,
+        my_db.read_columns ("log", "20250904141020" , [0,3]))
     #
     print ("good read:", my_db.read_row ("customer", "000100")) # Good key
     print ("bad read:", my_db.read_row ("customer", "000199")) # bad key

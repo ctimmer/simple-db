@@ -27,10 +27,10 @@
 import json
 
 # Run the following with micropython
-#from simple_db import SimpleDB, simpledb_available
+from simple_db import SimpleDB, simpledb_available
 
 # Run the following with python
-from simple_db_btrees import SimpleDB, simpledb_available
+#from simple_db_btrees import SimpleDB, simpledb_available
 
 '''
 From json-rpc documentation
@@ -75,6 +75,10 @@ METHODS = {
         "method" : None
         } ,
     "read_row" : {
+        "allowed" : True ,
+        "method" : None
+        } ,
+    "read_columns" : {
         "allowed" : True ,
         "method" : None
         } ,

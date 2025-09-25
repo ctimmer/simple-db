@@ -148,6 +148,7 @@ class SimpleDB :
         if self.auto_commit :
             self.commit ()
         return reply          # return updated row
+
     ## read row from table/key, returns None if not found
     def read_row (self,table_name,key) :
         #print ("read_row:", self.build_key (table_name, key))
@@ -155,6 +156,27 @@ class SimpleDB :
             #print (loads (self.db [self.build_key (table_name, key)]))
             return loads (self.db [self.build_key (table_name, key)])
         except Exception :
+            return None
+    ## read row columns from table/key, returns None if not found
+    def read_columns (self,table_name,key,column_list) :
+        #print ("read_columns:", self.build_key (table_name, key), column_list)
+        try :
+            row = loads (self.db [self.build_key (table_name, key)])
+            columns = {}
+            # set valid valid column id test
+            id_exists = None
+            if isinstance (row, list) :
+                id_exists = lambda col_id : col_id >= 0 and col_id < len (row)
+            else :
+                id_exists = lambda col_id : col_id in row
+            for _, col_id in enumerate (column_list) :
+                if id_exists (col_id) :
+                    columns [col_id] = row [col_id]   # Valid column id
+                else :
+                    columns [col_id] = None           # Bad column id
+            return columns
+        except Exception as e :
+            print (e)
             return None
 
     ## read first table indexed row, or first row if key is not provided
