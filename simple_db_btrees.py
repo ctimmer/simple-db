@@ -70,7 +70,10 @@ except Exception as e :
 
 simpledb_available = OOBTree is not None
 
-class SimpleDB :
+DATE_FORMAT = "{:04d}-{:02d}-{:02d}"
+TIME_FORMAT = "{:02d}:{:02d}:{:02d}"
+
+class SimpleDBBtrees :
     def __init__ (self,db_file_path,key_separator = ".",dump_separator="~",auto_commit=True) :
         if OOBTree is None :
             print ("support module(s) missing")
@@ -201,10 +204,23 @@ class SimpleDB :
         return self.build_key (table_name, key) in self.db
     ## Delete row from table
     def delete_row (self,table_name,key) :
+        row_data = None
+        delete_key = self.build_key (table_name, key)
+        try :
+            #print (loads (self.db [self.build_key (table_name, key)]))
+            row_data = loads (self.db [delete_key])
+            del (self.db [delete_key])
+            if self.auto_commit :
+                self.commit ()
+        except Exception :
+            pass
+        return row_data
+        '''
         if self.row_exists (table_name, key) :
             del (self.db [self.build_key (table_name, key)])
             if self.auto_commit :
                 self.commit ()
+        '''
     ## Returns list of keys in table
     def get_table_keys (self,table_name,start_key=None,end_key=None,limit=999999) :
         key_list = []
@@ -308,6 +324,26 @@ class SimpleDB :
         self.btrees_connection.close()
         self.btrees_db.close()
 
+    ## Utilities
+    def get_date_time (self, epoch_seconds = None) :
+        seconds = epoch_seconds
+        if seconds is None :
+            seconds = time.time ()
+        local_time = time.localtime (seconds)
+        return self.get_date (seconds) + " " + self.get_time (seconds)
+    def get_date (self, epoch_seconds = None) :
+        seconds = epoch_seconds
+        if seconds is None :
+            seconds = time.time ()
+        local_time = time.localtime (seconds)
+        return DATE_FORMAT.format (local_time[0],local_time[1],local_time[2])
+    def get_time (self, epoch_seconds = None) :
+        seconds = epoch_seconds
+        if seconds is None :
+            seconds = time.time ()
+        local_time = time.localtime (seconds)
+        return TIME_FORMAT.format (local_time[3],local_time[4],local_time[5])
+
 # end SimpleDB  #
 
 
@@ -347,6 +383,10 @@ def main () :
                                             "name":"Curly" ,
                                             "dob":19250303 ,
                                             "occupation":"Three stooges"})
+    my_db.write_row ("customer", "customer_number", {"customer_number" : "999999" ,
+                                            "name":"Delete test" ,
+                                            "dob":20000101 ,
+                                            "occupation":"doesnt matter"})
     my_db.write_row ("invoice",
                     "invoice_number" ,
                     {"invoice_number" : "090001" ,
@@ -374,8 +414,16 @@ def main () :
     print ("bad read:", my_db.read_row ("customer", "000199")) # bad key
     print ("all keys:", my_db.get_table_keys ("customer"))
     print ("rows:", my_db.get_table_rows ("customer", "000500", "990000"))
+    if my_db.row_exists ("customer", "999999") :
+        print ("Delete row:", my_db.delete_row ("customer", "999999"))
+        if my_db.row_exists ("customer", "999999") :
+            print ("customer 999999 was not delete")
+        else :
+            print ("customer 999999 delete success")
+    else :
+        print ("Customer: 999999 missing")
     #
-    my_db.get_table_items ("customer")
+    #print (my_db.get_table_items ("customer"))
 
     row = my_db.first_row ("customer")
     while row is not None :
@@ -398,3 +446,4 @@ def main () :
 #----------------------------------------------------
 if __name__ == "__main__" :
     main ()
+

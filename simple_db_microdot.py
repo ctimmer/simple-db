@@ -25,11 +25,11 @@
 #
 
 from microdot import Microdot
-import json
 
 from simple_db_server import SimpleDBServer
 
 GET_SCALAR_PARAMETERS = [
+    "epoch_seconds" ,
     "file_path" ,
     "limit" ,
     "row_data" ,
@@ -39,13 +39,14 @@ GET_ARRAY_PARAMETERS = [
     "end_key" ,
     "key" ,
     "pk" ,
+    "column_list" ,
     "start_key"
     ]
 
 ################################################################################
 
 db = SimpleDBServer ()
-
+db.load ('financial_dump.txt')
 app = Microdot()
 
 @app.route('/', methods=["GET"])

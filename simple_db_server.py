@@ -120,6 +120,18 @@ METHODS = {
     "load" : {
         "allowed" : False ,
         "method" : None
+        } ,
+    "get_date_time" : {
+        "allowed" : True ,
+        "method" : None
+        } ,
+    "get_date" : {
+        "allowed" : True ,
+        "method" : None
+        } ,
+    "get_time" : {
+        "allowed" : True ,
+        "method" : None
         }
     }
         

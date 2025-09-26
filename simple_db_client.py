@@ -26,7 +26,8 @@
 ## SimpleDBClient
 #
 # Notes:
-#   o 
+#   o get_date_time,get_date,get_time functions return local time, not the
+#     server local time.
 #
 ################################################################################
 
@@ -51,6 +52,9 @@ def send_request (rpc_dict) :
             response.close ()
     ## report error here
     return None
+
+DATE_FORMAT = "{:04d}-{:02d}-{:02d}"
+TIME_FORMAT = "{:02d}:{:02d}:{:02d}"
 
 class SimpleDBClient :
     def __init__ (self, hostname = "localhost", port = 8080) :
@@ -176,6 +180,27 @@ class SimpleDBClient :
         request_dict = {}
         return self.send_rpc_request ("commit", request_dict)
 
+
+    def close (self) :
+        pass
+
+    ## Utilities
+    def get_date_time (self, epoch_seconds = None) :
+        request_dict = {
+            "epoch_seconds" : epoch_seconds
+            }
+        return self.send_rpc_request ("get_date_time", request_dict)
+    def get_date (self, epoch_seconds = None) :
+        request_dict = {
+            "epoch_seconds" : epoch_seconds
+            }
+        return self.send_rpc_request ("get_date", request_dict)
+    def get_time (self, epoch_seconds = None) :
+        request_dict = {
+            "epoch_seconds" : epoch_seconds
+            }
+        return self.send_rpc_request ("get_time", request_dict)
+
     def send_rpc_request (self, method, params) :
         self.id += 1
         rpc_dict = {
@@ -192,9 +217,6 @@ class SimpleDBClient :
             elif "error" in reply :
                 pass   # Do something here?
         return None
-
-    def close (self) :
-        pass
 
 # end SimpleDBClient  #
 
