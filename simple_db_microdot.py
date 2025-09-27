@@ -46,7 +46,7 @@ GET_ARRAY_PARAMETERS = [
 ################################################################################
 
 db = SimpleDBServer ()
-db.load ('financial_dump.txt')
+
 app = Microdot()
 
 @app.route('/', methods=["GET"])
