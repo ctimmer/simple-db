@@ -31,6 +31,8 @@
 #
 ################################################################################
 
+import time
+
 import requests
 import json
 
@@ -57,8 +59,14 @@ DATE_FORMAT = "{:04d}-{:02d}-{:02d}"
 TIME_FORMAT = "{:02d}:{:02d}:{:02d}"
 
 class SimpleDBClient :
-    def __init__ (self, hostname = "localhost", port = 8080) :
+    def __init__ (self, hostname = "localhost",
+                    port = 8080,
+                    use_local_date_time = True) :
         global REQUEST_URL
+        if not use_local_date_time :
+            self.get_date_time = self.get_date_time_server
+            self.get_date = self.get_date_server
+            self.get_time = self.get_time_server
         self.id = 0
         self.url = "http://" + hostname + ":" + str (port)
         REQUEST_URL = self.url
@@ -185,21 +193,40 @@ class SimpleDBClient :
         pass
 
     ## Utilities
-    def get_date_time (self, epoch_seconds = None) :
+    def get_date_time_server (self, epoch_seconds = None) :
         request_dict = {
             "epoch_seconds" : epoch_seconds
             }
         return self.send_rpc_request ("get_date_time", request_dict)
-    def get_date (self, epoch_seconds = None) :
+    def get_date_server (self, epoch_seconds = None) :
         request_dict = {
             "epoch_seconds" : epoch_seconds
             }
         return self.send_rpc_request ("get_date", request_dict)
-    def get_time (self, epoch_seconds = None) :
+    def get_time_server (self, epoch_seconds = None) :
         request_dict = {
             "epoch_seconds" : epoch_seconds
             }
         return self.send_rpc_request ("get_time", request_dict)
+    ## Utilities
+    def get_date_time (self, epoch_seconds = None) :
+        seconds = epoch_seconds
+        if seconds is None :
+            seconds = time.time ()
+        local_time = time.localtime (seconds)
+        return self.get_date (seconds) + " " + self.get_time (seconds)
+    def get_date (self, epoch_seconds = None) :
+        seconds = epoch_seconds
+        if seconds is None :
+            seconds = time.time ()
+        local_time = time.localtime (seconds)
+        return DATE_FORMAT.format (local_time[0],local_time[1],local_time[2])
+    def get_time (self, epoch_seconds = None) :
+        seconds = epoch_seconds
+        if seconds is None :
+            seconds = time.time ()
+        local_time = time.localtime (seconds)
+        return TIME_FORMAT.format (local_time[3],local_time[4],local_time[5])
 
     def send_rpc_request (self, method, params) :
         self.id += 1
@@ -220,12 +247,17 @@ class SimpleDBClient :
 
 # end SimpleDBClient  #
 
-
 def main () :
     import os
     #print (os.uname())
-    my_db = SimpleDBClient ("127.0.0.1", 8080)
+    my_db = SimpleDBClient ("127.0.0.1", 8080, use_local_date_time=True)
     #
+    print ("date_time:", my_db.get_date_time ())
+    print ("date:", my_db.get_date ())
+    print ("time:", my_db.get_time ())
+    print ("date_time (server):", my_db.get_date_time_server ())
+    print ("date (server):", my_db.get_date_server ())
+    print ("time (server):", my_db.get_time_server ())
     my_db.write_row ("customer", "customer_number" ,  {"customer_number" : "000100" ,
                                                         "name":"Curt" ,
                                                         "dob":19560606 ,
@@ -274,7 +306,7 @@ def main () :
     print ("all keys:", my_db.get_table_keys ("customer"))
     print ("rows:", my_db.get_table_rows ("customer", "000500", "990000"))
     #
-    my_db.get_table_items ("customer")
+    #my_db.get_table_items ("customer")
 
     row = my_db.first_row ("customer")
     while row is not None :

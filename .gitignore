@@ -3,7 +3,7 @@
 # my ignores
 *.swp
 db_dump.txt
-*test.db*
+*_test.db*
 btrees/
 
 __pycache__/

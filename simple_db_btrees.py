@@ -346,18 +346,17 @@ class SimpleDBBtrees :
 
 # end SimpleDB  #
 
-
 def main () :
     import os
     #print (os.uname())
-    db_file_name = "btrees.db"
+    db_file_name = "btrees_test.db"
     try :
         os.remove (db_file_name)
         os.remove (db_file_name + ".index")
         print ("Removed:", db_file_name)
     except :
         pass
-    my_db = SimpleDB  (db_file_name)
+    my_db = SimpleDBBtrees (db_file_name)
     if not simpledb_available :
         import sys
         print ("db failed to initialize")

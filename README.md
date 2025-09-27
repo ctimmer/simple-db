@@ -6,6 +6,7 @@
 - __[Module Functions](#module-functions)__
   - [Parameter Formates](#parameter-formats)
   - [Functions](#functions)
+  - [Utility Functions](#utility-functions)
 - __[Client Server Implementation](#client-server-implementation)__
 - __[Internal Database Structure](#internal-database-structure)__
   - [Other Storage Considerations](#other-storage-considerations)
@@ -54,6 +55,10 @@ Basic relational type database interface.
     - The row array cannot be extended with this function
 - limit
   - Sets the maximum number of returned values for those functions that return lists
+- epoch_seconds Default: None
+  - If None, returns current date/time values
+  - If set, returns epoch_seconds date/time values
+    - epoch_seconds is typically returned from time.mktime()
 
 ### Functions
 
@@ -113,6 +118,21 @@ __commit ()__
 
 __close ()__
 - closes btree instance and database file
+
+### Utility Functions
+
+#### Date and Time Functions
+
+These functions allow storing date/time data in a consistent format. If epoch_seconds is not provided, current date/time is used.
+
+__get_date_time (epoch_seconds)__
+- Returns 'YYYY-MM-DD HH:MM:SS'
+
+__get_date (epoch_seconds)__
+- Returns 'YYYY-MM-DD'
+
+__get_time (epoch_seconds)__
+- Returns 'HH:MM:SS'
 
 ## Client Server Implementation
 
@@ -191,6 +211,8 @@ It uses btrees database, a much more robust DB system.
 
 Decimal numbers (e.g. currency) should be stored as strings.
 The client application can then use [mpy_decimal](https://github.com/mpy-dev/micropython-decimal-number) to manipulate without floating point errors.
+
+#### Date and Time
 
 ## Files
 
