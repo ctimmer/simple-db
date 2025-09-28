@@ -193,12 +193,6 @@ class SimpleDB :
         except Exception :
             pass
         return row_data
-        '''
-        if self.row_exists (table_name, key) :
-            del (self.db [self.build_key (table_name, key)])
-            if self.auto_commit :
-                self.commit ()
-        '''
 
     ## Returns list of keys in table
     def get_table_keys (self,table_name,start_key=None,end_key=None,limit=999999) :
@@ -331,7 +325,7 @@ def main () :
         print ("Removed:", db_file_name)
     except :
         pass
-    my_db = SimpleDB  (db_file_name)
+    my_db = SimpleDB (db_file_name)
     if not simpledb_available :
         import sys
         print ("db failed to initialize")

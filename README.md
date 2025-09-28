@@ -4,7 +4,7 @@
 
 - __[Overview](#overview)__
 - __[Module Functions](#module-functions)__
-  - [Parameter Formates](#parameter-formats)
+  - [Parameter Formats](#parameter-formats)
   - [Functions](#functions)
   - [Utility Functions](#utility-functions)
 - __[Client Server Implementation](#client-server-implementation)__
@@ -17,6 +17,57 @@
 ## Overview
 
 Basic relational type database interface.
+
+## Quick Start
+
+Install simple_db.py:
+```
+mpremote mip install github:ctimmer/simple-db/simple_db.py
+```
+If you don't have mpremote, download simple_db.py from [here](https://github.com/ctimmer/simple-db). Copy the file to your micropython device.  Note: not all firmware versions have the btree module. The unix port does contain the btree module.
+
+Run the following micropython code:
+```
+# Quick Start
+
+import sys
+
+from simple_db import SimpleDB, simpledb_available
+
+if not simpledb_available:
+    print ("SimpleDB did not initialize: probably missing btree module")
+    sys.exit ()
+
+# 1. create/open database
+qs_db = SimpleDB ("qs.db")
+
+# 2. Add create "cust" table, add a row with a primary key: "cust_no"
+qs_db.write_row ("cust", "cust_no", {"cust_no":"0100","first":"curt","last":"timmerman"})
+
+# Read row just created
+print ("New:",qs_db.read_row ("cust", "0100"))
+
+# 3. Add "location" to row
+qs_db.rewrite_row ("cust", "0100", {"location":"Alaska"})
+
+# Read row just updated
+print ("Upd:",qs_db.read_row ("cust", "0100"))
+
+# 4. Dump database (1 row) to a text file ("qs.db.dump.txt")
+qs_db.dump_all ()
+
+# 5. we are done
+qs_db.close ()
+```
+
+This code:
+- (1) Creates a btree database called "qs.db"
+- (2) Adds a row to the "cust" table
+- (3) Updates the row
+- (4) Dumps qs.db to a text file called "qs.db.dump.txt"
+  - Shows the btree key, text up to the "~"
+  - Row data, text after the "~"
+- (5) Closes the database.
 
 ## Module Functions
 
