@@ -7,11 +7,16 @@
   - [Parameter Formats](#parameter-formats)
   - [Functions](#functions)
   - [Utility Functions](#utility-functions)
-- __[Client Server Implementation](#client-server-implementation)__
+- __[Remote Server](#client-server-implementation)__
 - __[Internal Database Structure](#internal-database-structure)__
   - [Other Storage Considerations](#other-storage-considerations)
     - [msgpack](#msgpack)
     - [btrees DB](#btrees-db)
+    - [Decimal Numbers](#decimal-numbers)
+    - [Date/Time values](#date-and-time)
+- __[Installation](#installation)__
+  - [To device](#install-directly-on-the-device-with-mpremote)
+  - [Download file(s) from github](#download-the-source-files-from-github)
 - __[Files](#files)__
 
 ## Overview
@@ -185,7 +190,30 @@ __get_date (epoch_seconds)__
 __get_time (epoch_seconds)__
 - Returns 'HH:MM:SS'
 
-## Client Server Implementation
+## Remote Server Implementation
+
+These modules will eventually be more generic
+
+- Modules needed
+  - Client application
+    - simple_db_client.py
+      - Creates the json rpc message that is processed by simple_db_server.py
+      - SimpleDBClient class does not handle the network communications.
+      - send_request function handles to network interface.
+  - Server
+    - simple_db_microdot.py
+      - HTTP server using mocrodot module.
+      - POST requests are in json rpc format.
+      - GET requests parameters are converted to json rpc,
+      - Runs on a micropython processor or with the unix port.
+    - simple_db_server.py
+      - Processes the rpc message created by simple_db_client.py
+      - SimpleDBServer class does not handle the network communications.
+    - simple_db_btrees.py (optional)
+      - simple database that uses the btrees module.
+      - Will not run under MP, there is no btrees port.
+      - Btrees is a much more robust database engine.
+      - Database files are NOT compatible with the btree files.
 
 ## Internal Database Structure
 
@@ -264,6 +292,54 @@ Decimal numbers (e.g. currency) should be stored as strings.
 The client application can then use [mpy_decimal](https://github.com/mpy-dev/micropython-decimal-number) to manipulate without floating point errors.
 
 #### Date and Time
+
+If at all possible date/time values should be in the same format. See [utility functions](#utility-functions) for help with this.
+
+## Installation
+
+### install directly on the device with mpremote:
+
+__simple_db.py__
+```
+mpremote mip install github:ctimmer/simple-db/simple_db.py
+```
+
+__simple_db_client.py__
+```
+mpremote mip install github:ctimmer/simple-db/simple_db_client.py
+```
+
+__simple_db_server.py__
+```
+mpremote mip install github:ctimmer/simple-db/simple_db_server.py
+```
+
+### Download the source files from github:
+
+__simple_db.py__
+```
+wget https://raw.githubusercontent.com/ctimmer/simple-db/main/simple_db.py
+```
+
+__simple_db_client.py__
+```
+wget https://raw.githubusercontent.com/ctimmer/simple-db/main/simple_db_client.py
+```
+
+__simple_db_server.py__
+```
+wget https://raw.githubusercontent.com/ctimmer/simple-db/main/simple_db_server.py
+```
+
+__simple_db_microdot.py__
+```
+wget https://raw.githubusercontent.com/ctimmer/simple-db/main/simple_db_microdot.py
+```
+
+__simple_db_btrees.py__
+```
+wget https://raw.githubusercontent.com/ctimmer/simple-db/main/simple_db_btrees.py
+```
 
 ## Files
 

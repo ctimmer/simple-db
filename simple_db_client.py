@@ -38,6 +38,7 @@ import json
 
 ## This function determines how the json RPC request is sent
 # The RPC reply is returned as a dict or None on error
+# This code should be in a module
 REQUEST_URL = None
 def send_request (rpc_dict) :
     response = None
@@ -59,7 +60,8 @@ DATE_FORMAT = "{:04d}-{:02d}-{:02d}"
 TIME_FORMAT = "{:02d}:{:02d}:{:02d}"
 
 class SimpleDBClient :
-    def __init__ (self, hostname = "localhost",
+    def __init__ (self,
+                    hostname = "localhost",
                     port = 8080,
                     use_local_date_time = True) :
         global REQUEST_URL
@@ -236,7 +238,6 @@ class SimpleDBClient :
             "params" : params ,
             "id" : str (self.id)
             }
-        #print ("send_rpc: request:", self.url, rpc_dict)
         reply = send_request (rpc_dict)
         if reply is not None :
             if "result" in reply :
