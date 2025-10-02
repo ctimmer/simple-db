@@ -14,6 +14,9 @@
     - [btrees DB](#btrees-db)
     - [Decimal Numbers](#decimal-numbers)
     - [Date/Time values](#date-and-time)
+- __[Flowcharts](#flowcharts)__
+  - [Basic](#basic-simpledb-usage)
+  - [Remote Server](#remote-simpledb-usage)
 - __[Installation](#installation)__
   - [To device](#install-directly-on-the-device-with-mpremote)
   - [Download file(s) from github](#download-the-source-files-from-github)
@@ -295,6 +298,57 @@ The client application can then use [mpy_decimal](https://github.com/mpy-dev/mic
 
 If at all possible date/time values should be in the same format. See [utility functions](#utility-functions) for help with this.
 
+
+## Flowcharts
+
+### Basic SimpleDB usage
+
+- All micropython
+- Application and database on same device
+
+```mermaid
+flowchart TD
+    mp_app[MicroPython Application
+    Calls SimpleDB methods]
+    sdb_mod[SimpleDB module
+    Formats keys/row data passed to btree]
+    btree_mod[btree module
+    Manipulates btree database file]
+    btree_db[(btree Database)]
+    mp_app<-- requests / replies -->sdb_mod
+    sdb_mod<-- CRUD -->btree_mod
+    btree_mod<-- update / retrieve -->btree_db
+```
+
+### Remote SimpleDB usage
+
+- All micropython
+- Database server on a separate device
+- micropython unix port can be used on unix server
+- Btree database will be compatible with other micropython created btree files 
+
+```mermaid
+flowchart TD
+    mp_app[MicroPython Application
+    Calls SimpleDBClient methods, same as SimpleDB]
+    sdb_client_mod[SimpleDB client module
+    Formats method calls to json RPC]
+    comm_interface[Communications
+    Delivers json message to server and returns reply]
+    sdb_server_mod[SimpleDB server
+    Translates json RPC requests to SimpleDB method calls]
+    btree_mod[btree module]
+    btree_db[(btree Database)]
+    mp_app<-- requests / replies -->sdb_client_mod
+    sdb_client_mod<-- SimpleDB methods to json RPC -->comm_interface
+    comm_interface<-- json interface -->sdb_server_mod
+    sdb_server_mod<-- json RPC to SimpleDB methods -->sdb_mod
+    sdb_mod[SimpleDB module
+    Formats keys/row data passed to btree]<-- CRUD -->btree_mod[btree module
+    Manipulates btree database file]
+    btree_mod<-- update / retrieve -->btree_db
+```
+
 ## Installation
 
 ### install directly on the device with mpremote:
@@ -312,6 +366,11 @@ mpremote mip install github:ctimmer/simple-db/simple_db_client.py
 __simple_db_server.py__
 ```
 mpremote mip install github:ctimmer/simple-db/simple_db_server.py
+```
+
+__simple_db_microdot.py__
+```
+mpremote mip install github:ctimmer/simple-db/simple_db_microdot.py
 ```
 
 ### Download the source files from github:

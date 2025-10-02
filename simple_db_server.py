@@ -60,78 +60,58 @@ RPC_ERRORS = {
     RPC_DB_CALL_ERROR : "SimpleDB client call error"
     }
 
-READ_ONLY = False
+DEFAULT_METHODS = "readonly"
+DEFAULT_METHODS = "open"
 METHODS = {
-    "write_row" : {
-        "allowed" : not READ_ONLY ,
-        "method" : None
+    "readonly" : {
+        "write_row" : {"allowed" : False,"method" : None} ,
+        "rewrite_row" : {"allowed" : False,"method" : None} ,
+        "row_exists" : {"allowed" : True ,"method" : None} ,
+        "read_row" : {"allowed" : True ,"method" : None} ,
+        "read_columns" : {"allowed" : True ,"method" : None} ,
+        "first_row" : {"allowed" : True ,"method" : None} ,
+        "next_row" : {"allowed" : True ,"method" : None} ,
+        "get_table_keys" : {"allowed" : True ,"limit_max" : 500 ,"method" : None} ,
+        "get_table_rows" : {"allowed" : True ,"limit_max" : 200 ,"method" : None} ,
+        "get_table_items" : {"allowed" : True ,"limit_max" : 100 ,"method" : None} ,
+        "delete_row" : {"allowed" : False,"method" : None} ,
+        "commit" : {"allowed" : True ,"method" : None} ,
+        "dump_all" : {"allowed" : False ,"method" : None} ,
+        "load" : {"allowed" : False ,"method" : None} ,
+        "get_date_time" : {"allowed" : True ,"method" : None} ,
+        "get_date" : {"allowed" : True ,"method" : None} ,
+        "get_time" : {"allowed" : True ,"method" : None}
         } ,
-    "rewrite_row" : {
-        "allowed" : not READ_ONLY ,
-        "method" : None
+    "restricted" : {
+        "row_exists" : {"allowed" : True ,"method" : None} ,
+        "read_row" : {"allowed" : True ,"method" : None} ,
+        "read_columns" : {"allowed" : True ,"method" : None} ,
+        "first_row" : {"allowed" : True ,"method" : None} ,
+        "next_row" : {"allowed" : True ,"method" : None} ,
+        "get_table_rows" : {"allowed" : True ,"limit_max" : 20 ,"method" : None} ,
+        "commit" : {"allowed" : True ,"method" : None} ,
+        "get_date_time" : {"allowed" : True ,"method" : None} ,
+        "get_date" : {"allowed" : True ,"method" : None} ,
+        "get_time" : {"allowed" : True ,"method" : None}
         } ,
-    "row_exists" : {
-        "allowed" : True ,
-        "method" : None
-        } ,
-    "read_row" : {
-        "allowed" : True ,
-        "method" : None
-        } ,
-    "read_columns" : {
-        "allowed" : True ,
-        "method" : None
-        } ,
-    "first_row" : {
-        "allowed" : True ,
-        "method" : None
-        } ,
-    "next_row" : {
-        "allowed" : True ,
-        "method" : None
-        } ,
-    "get_table_keys" : {
-        "allowed" : True ,
-        "limit_max" : 500 ,
-        "method" : None
-        } ,
-    "get_table_rows" : {
-        "allowed" : True ,
-        "limit_max" : 200 ,
-        "method" : None
-        } ,
-    "get_table_items" : {
-        "allowed" : True ,
-        "limit_max" : 100 ,
-        "method" : None
-        } ,
-    "delete_row" : {
-        "allowed" : not READ_ONLY ,
-        "method" : None
-        } ,
-    "commit" : {
-        "allowed" : True ,
-        "method" : None
-        } ,
-    "dump_all" : {
-        "allowed" : True ,
-        "method" : None
-        } ,
-    "load" : {
-        "allowed" : False ,
-        "method" : None
-        } ,
-    "get_date_time" : {
-        "allowed" : True ,
-        "method" : None
-        } ,
-    "get_date" : {
-        "allowed" : True ,
-        "method" : None
-        } ,
-    "get_time" : {
-        "allowed" : True ,
-        "method" : None
+    "open" : {
+        "write_row" : {"allowed" : True,"method" : None} ,
+        "rewrite_row" : {"allowed" : True,"method" : None} ,
+        "row_exists" : {"allowed" : True ,"method" : None} ,
+        "read_row" : {"allowed" : True ,"method" : None} ,
+        "read_columns" : {"allowed" : True ,"method" : None} ,
+        "first_row" : {"allowed" : True ,"method" : None} ,
+        "next_row" : {"allowed" : True ,"method" : None} ,
+        "get_table_keys" : {"allowed" : True ,"limit_max" : 1000 ,"method" : None} ,
+        "get_table_rows" : {"allowed" : True ,"limit_max" : 500 ,"method" : None} ,
+        "get_table_items" : {"allowed" : True ,"limit_max" : 200 ,"method" : None} ,
+        "delete_row" : {"allowed" : True,"method" : None} ,
+        "commit" : {"allowed" : True ,"method" : None} ,
+        "dump_all" : {"allowed" : True ,"method" : None} ,
+        "load" : {"allowed" : True ,"method" : None} ,
+        "get_date_time" : {"allowed" : True ,"method" : None} ,
+        "get_date" : {"allowed" : True ,"method" : None} ,
+        "get_time" : {"allowed" : True ,"method" : None}
         }
     }
         
@@ -140,19 +120,30 @@ class SimpleDBServer :
                     db_file_name = "server_test.db") :
         ## Set up database methods
         self.db = SimpleDB (db_file_name)
-        for _, (method_id, method_data) in enumerate (METHODS.items ()) :
-            if method_data ["allowed"] :
-                method_data["method"] = getattr (self.db, method_id, None)
+        for _, (method_type, methods) in enumerate (METHODS.items ()) :
+            for _, (method_id, method_data) in enumerate (methods.items ()) :
+                if method_data ["allowed"] :
+                    try :
+                        method_data ["method"] = getattr (self.db, method_id, None)
+                    except Exception :
+                        method_data ["allowed"] = False
 
         ## Set up server
         self.rpc_reply = None
+        self.methods = None
 
-    def process_request (self, rpc_request) :
+    def process_request (self, rpc_request, methods = None) :
         #print ("process_request:", rpc_request)
         self.rpc_reply = {
             "jsonrpc" : "2.0" ,
             "id" : None 
             }
+        if methods is None :
+            self.methods = METHODS [DEFAULT_METHODS]
+        elif methods in METHODS :
+            self.methods = METHODS [methods]
+        else :
+            self.methods = METHODS [DEFAULT_METHODS]
         self.process_message (rpc_request)
         return self.rpc_reply
 
@@ -171,11 +162,11 @@ class SimpleDBServer :
             return None
         if "id" in self.rpc_dict :
             self.rpc_reply ["id"] = self.rpc_dict ["id"] # don't care about "id"
-        if self.rpc_dict["method"] not in METHODS :
+        if self.rpc_dict["method"] not in self.methods :
             self.rpc_error (RPC_METHOD_ERROR)        # Not a valid method
             return
         ## Test for valid/allowed method
-        method_data = METHODS [self.rpc_dict["method"]]
+        method_data = self.methods [self.rpc_dict["method"]]
         if not method_data ["allowed"] :
             self.rpc_error (RPC_METHOD_ERROR)        # method not allowed
             return
@@ -188,7 +179,7 @@ class SimpleDBServer :
         #print ("rpc: params", self.rpc_dict["params"])
         try :
             ## simple db function call
-            db_reply = METHODS [self.rpc_dict["method"]]["method"] (**self.rpc_dict["params"])
+            db_reply = self.methods [self.rpc_dict["method"]]["method"] (**self.rpc_dict["params"])
         except Exception as e :
             self.rpc_error_message (RPC_DB_CALL_ERROR, str(e))
             return

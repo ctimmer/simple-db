@@ -37,8 +37,13 @@ import time
 ## Required for load/dump
 import json
 
-USE_JSON = True
+## Default valules
+KEY_SEPARATOR = "."
+DUMP_SEPARATOR = "~"
+DATE_FORMAT = "{:04d}-{:02d}-{:02d}"
+TIME_FORMAT = "{:02d}:{:02d}:{:02d}"
 
+USE_JSON = True
 btree = None
 dumps = None
 loads = None
@@ -65,11 +70,9 @@ else :
 
 simpledb_available = btree is not None
 
-DATE_FORMAT = "{:04d}-{:02d}-{:02d}"
-TIME_FORMAT = "{:02d}:{:02d}:{:02d}"
-
+##
 class SimpleDB :
-    def __init__ (self,db_file_path,key_separator = ".",dump_separator="~",auto_commit=True) :
+    def __init__ (self,db_file_path,key_separator=KEY_SEPARATOR,dump_separator=DUMP_SEPARATOR,auto_commit=True) :
         if btree is None :
             print ("support module(s) missing")
             #raise ???
@@ -90,7 +93,9 @@ class SimpleDB :
     ## builds btree key from table_name and key
     def build_key (self,table_name,key="") -> bytes :
         pk = [table_name]
-        if isinstance (key, list) :
+        if key is None :
+            pass
+        elif isinstance (key, list) :
             for _, key_value in enumerate (key) :
                 pk.append (str (key_value))
         else :
@@ -99,6 +104,7 @@ class SimpleDB :
     ## rewrites table row from row_data
     def write_row (self,table_name,pk,row_data) :
         #print ("w_r:", table_name,pk)
+        # extract key values from row pk ids
         key = None
         if not isinstance (pk, list) :
             key = row_data [pk]

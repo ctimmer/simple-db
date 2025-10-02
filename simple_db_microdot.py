@@ -30,6 +30,7 @@ from microdot import Microdot
 
 from simple_db_server import SimpleDBServer
 
+## For handling GET parameters
 GET_SCALAR_PARAMETERS = [
     "epoch_seconds" ,
     "file_path" ,
