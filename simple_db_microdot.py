@@ -28,23 +28,7 @@ import json
 
 from microdot import Microdot
 
-from simple_db_server import SimpleDBServer
-
-## For handling GET parameters
-GET_SCALAR_PARAMETERS = [
-    "epoch_seconds" ,
-    "file_path" ,
-    "limit" ,
-    "row_data" ,
-    "table_name"
-    ]
-GET_ARRAY_PARAMETERS = [
-    "end_key" ,
-    "key" ,
-    "pk" ,
-    "column_list" ,
-    "start_key"
-    ]
+from simple_db_server import SimpleDBServer, SCALAR_PARAMETERS, ARRAY_PARAMETERS
 
 ################################################################################
 
@@ -65,11 +49,11 @@ async def simple_db_get (request):
     val = request.args.get ("id")
     if val is not None :
         request_json["id"] = val
-    for id in GET_SCALAR_PARAMETERS :
+    for id in SCALAR_PARAMETERS :
         val = request.args.get (id) # None = id missing
         if val is not None :
             request_json["params"][id] = str (val)
-    for id in GET_ARRAY_PARAMETERS :
+    for id in ARRAY_PARAMETERS :
         val = request.args.getlist(id) # always returns array
         if len (val) > 0 :
             request_json["params"][id] = val

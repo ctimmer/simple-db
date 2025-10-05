@@ -30,7 +30,7 @@ import json
 from simple_db import SimpleDB, simpledb_available
 
 # Run the following with python
-#from simple_db_btrees import SimpleDB, simpledb_available
+#from simple_db_btrees import SimpleDBBtrees as SimpleDB, simpledb_available
 
 '''
 From json-rpc documentation
@@ -64,6 +64,7 @@ DEFAULT_METHODS = "readonly"
 DEFAULT_METHODS = "open"
 METHODS = {
     "readonly" : {
+        "get_configuration" : {"allowed" : True,"method" : None} ,
         "write_row" : {"allowed" : False,"method" : None} ,
         "rewrite_row" : {"allowed" : False,"method" : None} ,
         "row_exists" : {"allowed" : True ,"method" : None} ,
@@ -83,6 +84,7 @@ METHODS = {
         "get_time" : {"allowed" : True ,"method" : None}
         } ,
     "restricted" : {
+        "get_configuration" : {"allowed" : True,"method" : None} ,
         "row_exists" : {"allowed" : True ,"method" : None} ,
         "read_row" : {"allowed" : True ,"method" : None} ,
         "read_columns" : {"allowed" : True ,"method" : None} ,
@@ -95,6 +97,7 @@ METHODS = {
         "get_time" : {"allowed" : True ,"method" : None}
         } ,
     "open" : {
+        "get_configuration" : {"allowed" : True,"method" : None} ,
         "write_row" : {"allowed" : True,"method" : None} ,
         "rewrite_row" : {"allowed" : True,"method" : None} ,
         "row_exists" : {"allowed" : True ,"method" : None} ,
@@ -114,7 +117,23 @@ METHODS = {
         "get_time" : {"allowed" : True ,"method" : None}
         }
     }
-        
+
+## For handling GET parameters
+SCALAR_PARAMETERS = [
+    "epoch_seconds" ,
+    "file_path" ,
+    "limit" ,
+    "row_data" ,
+    "table_name"
+    ]
+ARRAY_PARAMETERS = [
+    "end_key" ,
+    "key" ,
+    "pk_id" ,
+    "column_list" ,
+    "start_key"
+    ]
+
 class SimpleDBServer :
     def __init__ (self ,
                     db_file_name = "server_test.db") :

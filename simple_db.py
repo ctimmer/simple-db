@@ -73,10 +73,16 @@ simpledb_available = btree is not None
 ##
 class SimpleDB :
     def __init__ (self,db_file_path,key_separator=KEY_SEPARATOR,dump_separator=DUMP_SEPARATOR,auto_commit=True) :
+        self.key_separator = key_separator
+        self.key_low = ""
+        self.key_high = "~~~~~"
+        self.dump_separator = dump_separator
+        self.auto_commit = auto_commit
         if btree is None :
             print ("support module(s) missing")
             #raise ???
             return
+        ## OK, open file, btree DB
         self.db_file_path = db_file_path
         print (db_file_path)
         try:
@@ -84,11 +90,14 @@ class SimpleDB :
         except OSError:
             self.db_file = open(db_file_path, "w+b")
         self.db = btree.open (self.db_file)
-        self.key_separator = key_separator
-        self.key_low = ""
-        self.key_high = "~~~~~"
-        self.dump_separator = dump_separator
-        self.auto_commit = auto_commit
+
+    ## Return configuration
+    def get_configuration (self) :
+        return {
+            "key_separator" : self.key_separator ,
+            "dump_separator" : self.dump_separator ,
+            "simpledb_available" : simpledb_available
+            }
 
     ## builds btree key from table_name and key
     def build_key (self,table_name,key="") -> bytes :
@@ -101,23 +110,26 @@ class SimpleDB :
         else :
             pk.append (str (key))
         return bytes ((self.key_separator.join (pk)).encode ())
-    ## rewrites table row from row_data
-    def write_row (self,table_name,pk,row_data) :
-        #print ("w_r:", table_name,pk)
-        # extract key values from row pk ids
+    def build_key_from_ids (self,table_name,pk_id=None,row_data=None) :
         key = None
-        if not isinstance (pk, list) :
-            key = row_data [pk]
+        if pk_id is None :
+            pass
+        elif not isinstance (pk_id, list) :
+            key = row_data [pk_id]
         else :
             key = []
-            for _, key_id in enumerate (pk) :
+            for _, key_id in enumerate (pk_id) :
                 key.append (row_data [key_id])
-        db_key = self.build_key(table_name, key)
+        return self.build_key (table_name,key)
+
+    ## rewrites table row from row_data
+    def write_row (self,table_name,pk_id,row_data) :
+        #print ("w_r:", table_name,pk)
+        db_key = self.build_key_from_ids (table_name,pk_id,row_data)
         db_row = dumps(row_data)
         self.db [db_key] = db_row
         if self.auto_commit :
             self.commit ()
-
     ## rewrites updated table row from update_data
     def rewrite_row (self,table_name,key,update_data) :
         #print ("w_r:", table_name,pk)
@@ -136,6 +148,7 @@ class SimpleDB :
         if self.auto_commit :
             self.commit ()
         return reply          # return updated row
+
     ## read row from table/key, returns None if not found
     def read_row (self,table_name,key) :
         #print ("read_row:", self.build_key (table_name, key))
@@ -271,6 +284,10 @@ class SimpleDB :
                 #print (f"dump: {key}{self.dump_separator}{row}")
                 #print (f"{key}{self.dump_separator}{row}", file=dump_file)
                 dump_file.write (key + self.dump_separator + row + "\n")
+    ## Build dump_all extract line (no database access)
+    def dump_build_line (self,table_name,pk_id,row_data) :
+        key = self.build_key_from_ids (table_name, pk_id, row_data).decode ()
+        return key + self.dump_separator + json.dumps (row_data) + "\n"
 
     ## load - Load DB from dump_all file format
     def load (self, file_path = None) :
@@ -332,6 +349,12 @@ def main () :
     except :
         pass
     my_db = SimpleDB (db_file_name)
+    print ("build_row:",my_db.dump_build_line ("customer",
+                                                "customer_number" ,
+                                                {"customer_number" : "000100" ,
+                                                    "name":"Curt" ,
+                                                    "dob":19560606 ,
+                                                    "occupation":"retired"}))
     if not simpledb_available :
         import sys
         print ("db failed to initialize")

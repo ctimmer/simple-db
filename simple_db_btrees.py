@@ -75,19 +75,16 @@ TIME_FORMAT = "{:02d}:{:02d}:{:02d}"
 
 class SimpleDBBtrees :
     def __init__ (self,db_file_path,key_separator = ".",dump_separator="~",auto_commit=True) :
+        self.key_separator = key_separator
+        self.key_low = ""
+        self.key_high = "~~~~~"
+        self.dump_separator = dump_separator
+        self.auto_commit = auto_commit
         if OOBTree is None :
             print ("support module(s) missing")
             #raise ???
             return
-        '''
-        self.db_file = None
-        print (db_file_path)
-        try:
-            self.db_file = open(db_file_path, "r+b")
-        except OSError:
-            self.db_file = open(db_file_path, "w+b")
-        self.db = btree.open (self.db_file)
-        '''
+        #
         self.db_file_path = db_file_path
         btrees_root = "SimpleDB"
         # 1. Create a FileStorage for persistence
@@ -101,38 +98,46 @@ class SimpleDBBtrees :
             root[btrees_root] = OOBTree()
         # 4. Get a reference to the OOBTree
         self.db = root[btrees_root]
-        #
-        self.key_separator = key_separator
-        self.key_low = ""
-        self.key_high = "~~~~~"
-        self.dump_separator = dump_separator
-        self.auto_commit = auto_commit
+
+    ## Return configuration
+    def get_configuration (self) :
+        return {
+            "key_separator" : self.key_separator ,
+            "dump_separator" : self.dump_separator ,
+            "simpledb_available" : simpledb_available
+            }
 
     ## builds btree key from table_name and key
     def build_key (self,table_name,key="") -> bytes :
         pk = [table_name]
-        if isinstance (key, list) :
+        if key is None :
+            pass
+        elif isinstance (key, list) :
             for _, key_value in enumerate (key) :
                 pk.append (str (key_value))
         else :
             pk.append (str (key))
         return bytes ((self.key_separator.join (pk)).encode ())
-    ## rewrites table row from row_data
-    def write_row (self,table_name,pk,row_data) :
-        #print ("w_r:", table_name,pk)
+    def build_key_from_ids (self,table_name,pk_id=None,row_data=None) :
         key = None
-        if not isinstance (pk, list) :
-            key = row_data [pk]
+        if pk_id is None :
+            pass
+        elif not isinstance (pk_id, list) :
+            key = row_data [pk_id]
         else :
             key = []
-            for _, key_id in enumerate (pk) :
+            for _, key_id in enumerate (pk_id) :
                 key.append (row_data [key_id])
-        db_key = self.build_key(table_name, key)
+        return self.build_key (table_name,key)
+
+    ## rewrites table row from row_data
+    def write_row (self,table_name,pk_id,row_data) :
+        #print ("w_r:", table_name,pk)
+        db_key = self.build_key_from_ids (table_name,pk_id,row_data)
         db_row = dumps(row_data)
         self.db [db_key] = db_row
         if self.auto_commit :
             self.commit ()
-
     ## rewrites updated table row from update_data
     def rewrite_row (self,table_name,key,update_data) :
         #print ("w_r:", table_name,pk)
@@ -292,6 +297,10 @@ class SimpleDBBtrees :
                 #print (f"dump: {key}{self.dump_separator}{row}")
                 #print (f"{key}{self.dump_separator}{row}", file=dump_file)
                 dump_file.write (key + self.dump_separator + row + "\n")
+    ## Build dump_all extract line (no database access)
+    def dump_build_line (self,table_name,pk_id,row_data) :
+        key = self.build_key_from_ids (table_name, pk_id, row_data).decode ()
+        return key + self.dump_separator + json.dumps (row_data) + "\n"
 
     ## load - Load DB from dump_all file format
     def load (self, file_path = None) :

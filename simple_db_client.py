@@ -74,12 +74,26 @@ class SimpleDBClient :
         REQUEST_URL = self.url
         self.post_headers = {'Content-Type': 'application/json'}
 
+    ## Get server configuration
+    def get_configuration (self) :
+        request_dict = {}   # No parameters for now
+        server_config = self.send_rpc_request ("get_configuration", request_dict)
+        #
+        if "key_separator" in server_config :
+            self.key_separator = server_config ["key_separator"]
+        if "dump_separator" in server_config :
+            self.dump_separator = server_config ["dump_separator"]
+        #
+        if "simpledb_available" in server_config :
+            return server_config ["simpledb_available"]
+        return True         # Assume the best
+
     ## writes/rewrites table row from row_data
-    def write_row (self,table_name,pk,row_data) :
+    def write_row (self,table_name,pk_id,row_data) :
         #print ("w_r:", table_name,pk)
         request_dict = {
             "table_name" : table_name ,
-            "pk" : pk ,
+            "pk_id" : pk_id ,
             "row_data" : row_data
             }
         return self.send_rpc_request ("write_row", request_dict)
@@ -238,6 +252,7 @@ class SimpleDBClient :
             "params" : params ,
             "id" : str (self.id)
             }
+        ## Send request to server
         reply = send_request (rpc_dict)
         if reply is not None :
             if "result" in reply :
@@ -253,6 +268,7 @@ def main () :
     #print (os.uname())
     my_db = SimpleDBClient ("127.0.0.1", 8080, use_local_date_time=True)
     #
+    print (my_db.get_configuration ())
     print ("date_time:", my_db.get_date_time ())
     print ("date:", my_db.get_date ())
     print ("time:", my_db.get_time ())
